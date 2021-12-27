@@ -1,17 +1,14 @@
 var player
-var playerStartX = 10
+var playerStartX = 25
 var objectSpeed = 10
 var objStartX = 750
 var jumpHeight = 80
 var gravity = 0.8
 var jumping = false
 var difficultyInc = 0.00125
+var playerScore
 
-function startGame() {
-    player = new createPlayer(40, 80, "blue", playerStartX, 520)
-    object = new createObject(50,30,"red", objStartX, 570)
-    gameArea.start()
-}
+
 
 var gameArea = {
     canvas : document.createElement("canvas"),
@@ -25,6 +22,15 @@ var gameArea = {
     clear : function() {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
     }
+}
+
+function startGame() {
+    player = new createPlayer(40, 80, "blue", playerStartX, 520)
+    object = new createObject(50,30,"red", objStartX, 570)
+    gameArea.start()
+    playerScore = 0
+    ctx = gameArea.context
+    ctx.font = "24px sans-serif"
 }
 
 function createPlayer(width, height, color, x, y) {
@@ -52,7 +58,10 @@ function createObject(width, height, color, x, y) {
         if(this.x < -this.width-25){ // todo
             this.x = objStartX
             newX = Math.floor(Math.random() * (100-30) + 30)
+            newY = Math.floor(Math.random() * (50-30) + 30)
+            this.height = newY
             this.width = newX
+            this.y = gameArea.canvas.height - this.height
             // todo
         }
         objectSpeed = objectSpeed + difficultyInc         
@@ -72,6 +81,9 @@ function jump() {
                     clearInterval(fallDown)
                     jumping = false
                 }
+                if(player.y >= 520){
+                    player.y = 510
+                }
                 player.y += 10
             },30)
         }
@@ -90,10 +102,13 @@ function onKeyDown(e){
 function updateGameArea() {
   gameArea.clear()
   if(object.x < playerStartX+player.width 
-  && object.x > playerStartX 
-  && player.y+player.height == gameArea.canvas.height ){ // still not correct
-      alert("Game Over!")
-  }
+    && object.x > playerStartX 
+    && player.y+player.height >= object.y){
+        alert("Game Over!\nYour highscore is: " + Math.round(playerScore))
+        location.reload(); 
+    }
   player.update()
   object.update()
+  playerScore = playerScore + 0.125
+  ctx.fillText("Score: " + Math.round(playerScore),600,50);
 }
